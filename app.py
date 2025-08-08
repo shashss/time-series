@@ -42,7 +42,7 @@ if uploaded_file:
     if st.button("Generate Forecast"):
         prophet_df = df_filtered[['week starting date', 'demand volume']].rename(columns={'week starting date': 'ds', 'demand volume': 'y'})
         if freq == "Monthly":
-            prophet_df = prophet_df.resample('M', on='ds').sum().reset_index()
+            prophet_df = prophet_df.resample('MS', on='ds').sum().reset_index()
 
         m = Prophet(
             changepoint_prior_scale=changepoint_prior_scale,
@@ -52,7 +52,7 @@ if uploaded_file:
         )
         m.fit(prophet_df)
 
-        future = m.make_future_dataframe(periods=periods, freq='W' if freq == "Weekly" else 'M')
+        future = m.make_future_dataframe(periods=periods, freq='W' if freq == "Weekly" else 'MS')
         forecast = m.predict(future)
 
         st.subheader("Forecast Plot with Conditional Coloring")
