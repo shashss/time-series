@@ -34,7 +34,7 @@ if uploaded_file:
         st.stop()
 
     # Convert date
-    df['Week starting date'] = pd.to_datetime(df['Week starting date'], errors='coerce')
+    df['Week starting date'] = pd.to_datetime(df['Week starting date'], errors='coerce', dayfirst=True)
     if df['Week starting date'].isnull().any():
         st.error("Invalid dates found in 'Week starting date'.")
         st.stop()
@@ -183,3 +183,4 @@ if st.session_state.df is not None:
     # ----------------------------
     csv_forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_csv(index=False).encode('utf-8')
     st.download_button("📥 Download Forecast Data", csv_forecast, "forecast.csv", "text/csv")
+
