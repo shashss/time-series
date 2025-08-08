@@ -32,7 +32,7 @@ if uploaded_file:
         st.stop()
 
     # Ensure column names match expected
-    expected_cols = {'Month and year', 'Week starting date', 'language', 'region', 'demand volume'}
+    expected_cols = {'month and year', 'week starting date', 'language', 'region', 'demand volume'}
     if not expected_cols.issubset(set(df.columns.str.lower())):
         st.warning(f"CSV must contain columns: {expected_cols}")
         st.stop()
@@ -140,4 +140,5 @@ if uploaded_file:
 
         st.subheader("📊 Yearly Month-on-Month % Growth (Dec → Nov)")
         st.dataframe(growth_pivot.style.format("{:.2f}%"))
+
 
