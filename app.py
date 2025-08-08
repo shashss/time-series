@@ -22,7 +22,7 @@ if uploaded_file:
 
     # Date parsing
     try:
-        df['Week starting date'] = pd.to_datetime(df['Week starting date'], errors='coerce')
+        df['Week starting date'] = pd.to_datetime(df['Week starting date'], errors='coerce', dayfirst=True)
     except:
         st.error("Invalid dates found in 'Week starting date'. Please check the file.")
         st.stop()
@@ -140,3 +140,4 @@ if uploaded_file:
 
         st.subheader("📊 Yearly Month-on-Month % Growth (Dec → Nov)")
         st.dataframe(growth_pivot.style.format("{:.2f}%"))
+
