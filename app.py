@@ -14,11 +14,9 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file, dayfirst=True)
     df.columns = [col.strip().lower() for col in df.columns]
     
-    # Ensure date column is parsed
     df['week starting date'] = pd.to_datetime(df['week starting date'], dayfirst=True, errors='coerce')
     df = df.dropna(subset=['week starting date'])
 
-    # Sidebar for filters and sliders
     with st.sidebar:
         filter_type = st.radio("Filter by", ("language", "region"))
         if filter_type == "language":
@@ -39,9 +37,8 @@ if uploaded_file:
             changepoint_prior_scale = st.slider("Changepoint Prior Scale", 0.01, 1.0, 0.05, 0.01)
             seasonality_prior_scale = st.slider("Seasonality Prior Scale", 1, 30, 10, 1)
             seasonality_mode = st.selectbox("Seasonality Mode", ["additive", "multiplicative"])
-            yearly_seasonality = st.checkbox("Enable Yearly Seasonality", True)
+            yearly_seasonality = st.checkbox("Enable Yearly Seasonality", value=True)
 
-    # Main area for visuals
     if st.button("Generate Forecast"):
         prophet_df = df_filtered[['week starting date', 'demand volume']].rename(columns={'week starting date': 'ds', 'demand volume': 'y'})
         if freq == "Monthly":
@@ -51,18 +48,20 @@ if uploaded_file:
             changepoint_prior_scale=changepoint_prior_scale,
             seasonality_prior_scale=seasonality_prior_scale,
             seasonality_mode=seasonality_mode,
-            yearly_seasonality = yearly_seasonality
+            yearly_seasonality=yearly_seasonality
         )
         m.fit(prophet_df)
 
         future = m.make_future_dataframe(periods=periods, freq='W' if freq == "Weekly" else 'M')
         forecast = m.predict(future)
 
-        st.subheader("Forecast Plot")
-        fig = m.plot(forecast)
-        st.pyplot(fig)
+        st.subheader("Forecast Plot with Conditional Coloring")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines+markers',
+                                 marker=dict(color=['green' if val >= 0 else 'red' for val in forecast['yhat'].diff().fillna(0)]),
+                                 name='Forecast'))
+        st.plotly_chart(fig, use_container_width=True)
 
-        # Month-on-Month % growth table with conditional formatting
         prophet_df['mom_growth_%'] = prophet_df['y'].pct_change() * 100
         mom_df = prophet_df[['ds', 'y', 'mom_growth_%']].dropna()
         mom_df_styled = mom_df.style.format({'mom_growth_%': "{:.2f}%"}).background_gradient(subset=['mom_growth_%'], cmap='RdYlGn')
@@ -76,4 +75,3 @@ if uploaded_file:
             file_name=f"forecast_{filter_type}_{selected_value}_{freq}.csv",
             mime="text/csv"
         )
-
