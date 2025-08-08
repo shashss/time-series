@@ -39,6 +39,7 @@ if uploaded_file:
             changepoint_prior_scale = st.slider("Changepoint Prior Scale", 0.01, 1.0, 0.05, 0.01)
             seasonality_prior_scale = st.slider("Seasonality Prior Scale", 1, 30, 10, 1)
             seasonality_mode = st.selectbox("Seasonality Mode", ["additive", "multiplicative"])
+            yearly_seasonality = st.checkbox("Enable Yearly Seasonality", True)
 
     # Main area for visuals
     if st.button("Generate Forecast"):
@@ -49,7 +50,8 @@ if uploaded_file:
         m = Prophet(
             changepoint_prior_scale=changepoint_prior_scale,
             seasonality_prior_scale=seasonality_prior_scale,
-            seasonality_mode=seasonality_mode
+            seasonality_mode=seasonality_mode,
+            yearly_seasonality = yearly_seasonality
         )
         m.fit(prophet_df)
 
@@ -74,3 +76,4 @@ if uploaded_file:
             file_name=f"forecast_{filter_type}_{selected_value}_{freq}.csv",
             mime="text/csv"
         )
+
