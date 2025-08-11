@@ -38,6 +38,7 @@ if uploaded_file:
             seasonality_prior_scale = st.slider("Seasonality Prior Scale", 1, 30, 10, 1)
             seasonality_mode = st.selectbox("Seasonality Mode", ["additive", "multiplicative"])
             yearly_seasonality = st.checkbox("Enable Yearly Seasonality", value=True)
+            weekly_seasonality = st.checkbox("Enable Weekly Seasonality", value=True)
 
     if st.button("Generate Forecast"):
         prophet_df = df_filtered[['week starting date', 'demand volume']].rename(columns={'week starting date': 'ds', 'demand volume': 'y'})
@@ -48,11 +49,12 @@ if uploaded_file:
             changepoint_prior_scale=changepoint_prior_scale,
             seasonality_prior_scale=seasonality_prior_scale,
             seasonality_mode=seasonality_mode,
-            yearly_seasonality=yearly_seasonality
+            yearly_seasonality=yearly_seasonality,
+            weekly_seasonality=weekly_seasonality
         )
         m.fit(prophet_df)
 
-        future = m.make_future_dataframe(periods=periods, freq='W' if freq == "Weekly" else 'MS')
+        future = m.make_future_dataframe(periods=periods, freq='W-SAT' if freq == "Weekly" else 'MS')
         forecast = m.predict(future)
 
         st.subheader("Forecast Plot with Conditional Coloring")
@@ -75,3 +77,4 @@ if uploaded_file:
             file_name=f"forecast_{filter_type}_{selected_value}_{freq}.csv",
             mime="text/csv"
         )
+
